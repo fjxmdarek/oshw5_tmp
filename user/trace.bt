@@ -1,0 +1,46 @@
+#!/usr/bin/env bpftrace
+
+/* Track how much time a task spends on the run queue with 
+ * tracepoint:sched:sched_stat_wait and its delay arg
+ *
+ * Track how much time has elapsed until the task completed with
+ *tracepoint:sched:sched_process_exec and tracepoint:sched:sched_process_exit
+ */
+
+#include <linux/sched.h>
+
+BEGIN
+{
+    printf("COMM,PID,RUNQ_MS,TOTAL_MS\n");
+}
+
+/* accumulate time spent on the run queue for each task in a map */
+tracepoint:sched:sched_stat_wait
+{
+    @rqtime[args->pid] += args->delay;
+}
+
+/* track the starting time for the process */
+tracepoint:sched:sched_process_exec
+{
+    @start[args->pid] = nsecs;
+}
+
+/* capture the ending time and print the runtime statistics synchronously */
+tracepoint:sched:sched_process_exit
+{
+    $curr_pid = args->pid;
+    $ns = @start[$curr_pid];
+    if ($ns) {
+        printf("%s,%d,%d,%d\n", args->comm, $curr_pid, 
+            @rqtime[$curr_pid] / 1000000, (nsecs - $ns) / 1000000);
+        delete(@rqtime[$curr_pid]);
+        delete(@start[$curr_pid]);
+    }
+}
+
+END
+{
+    clear(@rqtime);
+    clear(@start);
+}
