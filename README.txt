@@ -8,3 +8,13 @@ The description should indicate whether your solution for the part is working
 or not. You may also want to include anything else you would like to
 communicate to the grader, such as extra functionality you implemented or how
 you tried to fix your non-working code.
+
+Part1 Runtime statistics:
+
+4 Core CPU:
+- taskset1 average completion time: 103.96 ms
+- taskset2 average completion time: 28.9798 ms
+
+1 Core CPU:
+- taskset1 average completion time: 37.7879 ms
+- taskset2 average completion time: 18.3333 ms
