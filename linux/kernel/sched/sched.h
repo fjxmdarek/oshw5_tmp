@@ -724,6 +724,15 @@ static inline bool rt_rq_is_runnable(struct rt_rq *rt_rq)
 	return rt_rq->rt_queued && rt_rq->rt_nr_running;
 }
 
+/* Freezer class' related fields in a runqueue */
+struct freezer_rq {
+	//TODO: may need more sophisticated data structure for tasks
+	//TODO: add fields as needed
+	struct list_head tasks;      /* runnable tasks */ 
+	unsigned int     nr_running; /* num tasks on rq */
+}
+
+
 /* Deadline class' related fields in a runqueue */
 struct dl_rq {
 	/* runqueue is an rbtree, ordered by deadline */
@@ -1015,6 +1024,8 @@ struct rq {
 	struct cfs_rq		cfs;
 	struct rt_rq		rt;
 	struct dl_rq		dl;
+	/* freezer run queue */
+	struct freezer_rq   fr;
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/* list of leaf cfs_rq on this CPU: */
@@ -2362,6 +2373,7 @@ extern struct sched_class __sched_class_lowest[];
 extern const struct sched_class stop_sched_class;
 extern const struct sched_class dl_sched_class;
 extern const struct sched_class rt_sched_class;
+extern const struct sched_class freezer_sched_class;
 extern const struct sched_class fair_sched_class;
 extern const struct sched_class idle_sched_class;
 

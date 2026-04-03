@@ -72,6 +72,7 @@ struct root_domain;
 struct rq;
 struct sched_attr;
 struct sched_dl_entity;
+struct sched_freezer_entity;
 struct seq_file;
 struct sighand_struct;
 struct signal_struct;
@@ -594,6 +595,13 @@ struct sched_rt_entity {
 
 typedef bool (*dl_server_has_tasks_f)(struct sched_dl_entity *);
 typedef struct task_struct *(*dl_server_pick_f)(struct sched_dl_entity *);
+
+/* Freezer sched entity definition */
+struct sched_freezer_entity {
+	// TODO: add fields as needed
+	// TODO: implement load balancing
+	struct list_head    run_list; /* to link back to the list in freezer_rq */
+}
 
 struct sched_dl_entity {
 	struct rb_node			rb_node;
