@@ -4572,6 +4572,7 @@ static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 	p->rt.on_list = 0;
 
 	/* freezer entity initialization */
+	// trace_printk("__sched_fork freezer init\n");
 	INIT_LIST_HEAD(&p->freezer.run_list);
 	p->freezer.time_slice = FREEZER_TIMESLICE;
 
@@ -4799,8 +4800,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 * Revert to default priority/policy on fork if requested.
 	 */
 	if (unlikely(p->sched_reset_on_fork)) {
-		if (task_has_dl_policy(p) || task_has_rt_policy(p) ||
-		    freezer_policy(p->policy)) {
+		if (task_has_dl_policy(p) || task_has_rt_policy(p)) {
 			p->policy = SCHED_NORMAL;
 			p->static_prio = NICE_TO_PRIO(0);
 			p->rt_priority = 0;
@@ -4821,8 +4821,6 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 		return -EAGAIN;
 	else if (rt_prio(p->prio))
 		p->sched_class = &rt_sched_class;
-	else if (freezer_policy(p->policy))
-		p->sched_class = &freezer_sched_class;
 	else
 		p->sched_class = &fair_sched_class;
 
@@ -7138,8 +7136,6 @@ static void __setscheduler_prio(struct task_struct *p, int prio)
 		p->sched_class = &dl_sched_class;
 	else if (rt_prio(prio))
 		p->sched_class = &rt_sched_class;
-	else if (freezer_policy(p->policy))
-		p->sched_class = &freezer_sched_class;
 	else
 		p->sched_class = &fair_sched_class;
 
@@ -9996,7 +9992,8 @@ void __init sched_init(void)
 	int i;
 
 	/* Make sure the linker didn't screw up */
-	BUG_ON(&idle_sched_class != &fair_sched_class + 1 ||
+	BUG_ON(&idle_sched_class != &freezer_sched_class + 1 ||
+		   &freezer_sched_class != &fair_sched_class + 1 ||
 	       &fair_sched_class != &rt_sched_class + 1 ||
 	       &rt_sched_class != &dl_sched_class + 1);
 #ifdef CONFIG_SMP

@@ -39,9 +39,10 @@
 #include "pelt.h"
 
 /* Source code modules: */
-#include "freezer.c"
 
 #include "idle.c"
+
+#include "freezer.c"
 
 #include "rt.c"
 

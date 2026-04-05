@@ -1,0 +1,68 @@
+#!/bin/bash
+# Enable kernel debugging configurations
+# Run from your linux source directory: cd ~/OS/hw5/linux && bash enable_debug_configs.sh
+
+set -e
+
+SCRIPTS="./scripts/config"
+
+echo "Enabling basic debugging configurations..."
+$SCRIPTS --enable CONFIG_DEBUG_KERNEL
+$SCRIPTS --enable CONFIG_DEBUG_MISC
+$SCRIPTS --enable CONFIG_DEBUG_INFO
+$SCRIPTS --enable CONFIG_KALLSYMS
+$SCRIPTS --enable CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+$SCRIPTS --enable CONFIG_DEBUG_BUGVERBOSE
+$SCRIPTS --enable CONFIG_SYMBOLIC_ERRNAME
+$SCRIPTS --enable CONFIG_PRINTK_CALLER
+
+echo "Enabling KASAN..."
+$SCRIPTS --enable CONFIG_KASAN
+$SCRIPTS --enable CONFIG_KASAN_GENERIC
+$SCRIPTS --enable CONFIG_KASAN_INLINE
+$SCRIPTS --enable CONFIG_KASAN_VMALLOC
+$SCRIPTS --enable CONFIG_KASAN_EXTRA_INFO
+$SCRIPTS --enable CONFIG_SLUB_DEBUG
+$SCRIPTS --enable CONFIG_SLUB_DEBUG_ON
+
+echo "Enabling kmemleak..."
+$SCRIPTS --enable CONFIG_DEBUG_KMEMLEAK
+$SCRIPTS --disable CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF
+
+echo "Enabling stack checking..."
+$SCRIPTS --enable CONFIG_SCHED_STACK_END_CHECK
+$SCRIPTS --enable CONFIG_STACK_VALIDATION
+
+echo "Enabling UBSAN..."
+$SCRIPTS --enable CONFIG_UBSAN
+$SCRIPTS --enable CONFIG_UBSAN_SANITIZE_ALL
+$SCRIPTS --enable CONFIG_UBSAN_BOUNDS
+$SCRIPTS --enable CONFIG_UBSAN_SHIFT
+$SCRIPTS --enable CONFIG_UBSAN_DIV_ZERO
+$SCRIPTS --enable CONFIG_UBSAN_BOOL
+$SCRIPTS --enable CONFIG_UBSAN_ENUM
+
+echo "Enabling free page checking..."
+$SCRIPTS --enable CONFIG_DEBUG_PAGEALLOC
+$SCRIPTS --enable CONFIG_DEBUG_PAGEALLOC_ENABLE_DEFAULT
+$SCRIPTS --enable CONFIG_PAGE_POISONING
+$SCRIPTS --enable CONFIG_DEBUG_OBJECTS
+
+echo "Enabling lock debugging..."
+$SCRIPTS --enable CONFIG_PROVE_LOCKING
+$SCRIPTS --enable CONFIG_DEBUG_LOCKDEP
+$SCRIPTS --enable CONFIG_DEBUG_SPINLOCK
+$SCRIPTS --enable CONFIG_DEBUG_ATOMIC_SLEEP
+$SCRIPTS --enable CONFIG_SOFTLOCKUP_DETECTOR
+$SCRIPTS --enable CONFIG_HARDLOCKUP_DETECTOR
+
+echo "Enabling ftrace..."
+$SCRIPTS --enable CONFIG_FUNCTION_TRACER
+$SCRIPTS --enable CONFIG_FUNCTION_GRAPH_TRACER
+$SCRIPTS --enable CONFIG_STACK_TRACER
+$SCRIPTS --enable CONFIG_DYNAMIC_FTRACE
+
+echo "Enabling misc debugging..."
+$SCRIPTS --enable CONFIG_DEBUG_LIST
+
+echo "Done! Run 'make olddefconfig' to apply, then rebuild."

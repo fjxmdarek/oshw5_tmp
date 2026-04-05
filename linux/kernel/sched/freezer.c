@@ -15,11 +15,23 @@
 /* initialize the freezer run queue */
 void init_freezer_rq(struct freezer_rq *fr)
 {
+	trace_printk("init_freezer_rq called\n");
 	INIT_LIST_HEAD(&fr->tasks);
 	fr->nr_running = 0;
+	trace_printk("init_freezer_rq done\n");
 }
 
 /* sched_class_freezer methods */
+
+// TODO:
+// implement barebones functions from idle.c
+// spinlocking
+
+// init rq in sched_init in core.c
+// compile with 1 cpu
+// rq needs a curr field
+// update curr
+// task_fork + task_dead
 
 /* add task to freezer run queue */
 static void enqueue_task_freezer(struct rq *rq, struct task_struct *p,
