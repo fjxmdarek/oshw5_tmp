@@ -4576,6 +4576,9 @@ static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 	INIT_LIST_HEAD(&p->freezer.run_list);
 	p->freezer.time_slice = FREEZER_TIMESLICE;
 
+	/* heater entity initialization */  
+	INIT_LIST_HEAD(&p->heater.run_list);
+
 #ifdef CONFIG_PREEMPT_NOTIFIERS
 	INIT_HLIST_HEAD(&p->preempt_notifiers);
 #endif
@@ -4801,7 +4804,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 */
 	if (unlikely(p->sched_reset_on_fork)) {
 		if (task_has_dl_policy(p) || task_has_rt_policy(p) ||
-		    freezer_policy(p->policy)) {
+		    freezer_policy(p->policy) || heater_policy(p->policy)) {
 			p->policy = SCHED_NORMAL;
 			p->static_prio = NICE_TO_PRIO(0);
 			p->rt_priority = 0;
@@ -4824,6 +4827,8 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 		p->sched_class = &rt_sched_class;
 	else if (freezer_policy(p->policy))
 		p->sched_class = &freezer_sched_class;
+	else if (heater_policy(p->policy))
+		p->sched_class = &heater_sched_class;
 	else
 		p->sched_class = &fair_sched_class;
 
@@ -7141,6 +7146,9 @@ static void __setscheduler_prio(struct task_struct *p, int prio)
 		p->sched_class = &rt_sched_class;
 	else if (freezer_policy(p->policy)) {
 		p->sched_class = &freezer_sched_class;
+	} 
+	else if (heater_policy(p->policy)) {
+		p->sched_class = &heater_sched_class;
 	} else
 		p->sched_class = &fair_sched_class;
 
@@ -7300,6 +7308,8 @@ void rt_mutex_setprio(struct task_struct *p, struct task_struct *pi_task)
 			queue_flag |= ENQUEUE_HEAD;
 	} else if (p->policy == SCHED_FREEZER) {
 		p->sched_class = &freezer_sched_class;
+	} else if (p->policy == SCHED_HEATER) { 
+		p->sched_class = &heater_sched_class; 
 	} else {
 		if (dl_prio(oldprio))
 			p->dl.pi_se = &p->dl;
@@ -9137,6 +9147,7 @@ SYSCALL_DEFINE1(sched_get_priority_max, int, policy)
 	case SCHED_BATCH:
 	case SCHED_IDLE:
 	case SCHED_FREEZER:
+	case SCHED_HEATER:
 		ret = 0;
 		break;
 	}
@@ -9165,6 +9176,7 @@ SYSCALL_DEFINE1(sched_get_priority_min, int, policy)
 	case SCHED_BATCH:
 	case SCHED_IDLE:
 	case SCHED_FREEZER:
+	case SCHED_HEATER:
 		ret = 0;
 	}
 	return ret;
@@ -9999,8 +10011,9 @@ void __init sched_init(void)
 	int i;
 
 	/* Make sure the linker didn't screw up */
-	BUG_ON(&idle_sched_class != &freezer_sched_class + 1 ||
-	       &freezer_sched_class != &fair_sched_class + 1 ||
+	BUG_ON(&idle_sched_class != &heater_sched_class + 1 ||
+       		&heater_sched_class != &freezer_sched_class + 1 ||
+       	        &freezer_sched_class != &fair_sched_class + 1 ||
 	       &fair_sched_class != &rt_sched_class + 1 ||
 	       &rt_sched_class != &dl_sched_class + 1);
 #ifdef CONFIG_SMP
@@ -10071,6 +10084,7 @@ void __init sched_init(void)
 		init_rt_rq(&rq->rt);
 		init_dl_rq(&rq->dl);
 		init_freezer_rq(&rq->fr);
+		init_heater_rq(&rq->hr);
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		INIT_LIST_HEAD(&rq->leaf_cfs_rq_list);
 		rq->tmp_alone_branch = &rq->leaf_cfs_rq_list;

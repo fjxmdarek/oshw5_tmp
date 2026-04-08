@@ -43,6 +43,7 @@
 #include "idle.c"
 
 #include "freezer.c"
+#include "heater.c"
 
 #include "rt.c"
 

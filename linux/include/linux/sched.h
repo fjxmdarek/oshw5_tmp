@@ -73,6 +73,7 @@ struct rq;
 struct sched_attr;
 struct sched_dl_entity;
 struct sched_freezer_entity;
+struct sched_heater_entity;
 struct seq_file;
 struct sighand_struct;
 struct signal_struct;
@@ -609,6 +610,12 @@ struct sched_freezer_entity {
 	unsigned int time_slice;
 };
 
+/* Heater sched entity definition */
+struct sched_heater_entity {
+	/* TODO: add fields as needed */
+	struct list_head run_list; /* to link back to the list in heater_rq */
+};
+
 struct sched_dl_entity {
 	struct rb_node rb_node;
 
@@ -813,6 +820,7 @@ struct task_struct {
 	struct sched_dl_entity dl;
 	struct sched_dl_entity *dl_server;
 	struct sched_freezer_entity freezer;
+	struct sched_heater_entity heater;
 	const struct sched_class *sched_class;
 
 #ifdef CONFIG_SCHED_CORE

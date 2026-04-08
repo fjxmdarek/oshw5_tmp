@@ -193,10 +193,15 @@ static inline int freezer_policy(int policy)
 	return policy == SCHED_FREEZER;
 }
 
+static inline int heater_policy(int policy)
+{
+	return policy == SCHED_HEATER;
+}
+
 static inline bool valid_policy(int policy)
 {
 	return idle_policy(policy) || fair_policy(policy) ||
-	       rt_policy(policy) || dl_policy(policy) || freezer_policy(policy);
+	       rt_policy(policy) || dl_policy(policy) || freezer_policy(policy) || heater_policy(policy);
 }
 
 static inline int task_has_idle_policy(struct task_struct *p)
@@ -759,6 +764,13 @@ struct freezer_rq {
 	struct list_head tasks; /* runnable tasks */
 	unsigned int nr_running; /* num tasks on rq */
 };
+/* Heater class' related fields in a runqueue */
+struct heater_rq {
+	//TODO: may need more sophisticated data structure for tasks
+	//TODO: add fields as needed
+	struct list_head tasks; /* runnable tasks */
+	unsigned int nr_running; /* num tasks on rq */
+};
 
 /* Deadline class' related fields in a runqueue */
 struct dl_rq {
@@ -1054,6 +1066,7 @@ struct rq {
 	struct dl_rq dl;
 	/* freezer run queue */
 	struct freezer_rq fr;
+	struct heater_rq hr;
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/* list of leaf cfs_rq on this CPU: */
@@ -2403,6 +2416,7 @@ extern const struct sched_class dl_sched_class;
 extern const struct sched_class rt_sched_class;
 extern const struct sched_class fair_sched_class;
 extern const struct sched_class freezer_sched_class;
+extern const struct sched_class heater_sched_class;
 extern const struct sched_class idle_sched_class;
 
 static inline bool sched_stop_runnable(struct rq *rq)
@@ -2945,6 +2959,7 @@ extern void init_cfs_rq(struct cfs_rq *cfs_rq);
 extern void init_rt_rq(struct rt_rq *rt_rq);
 extern void init_dl_rq(struct dl_rq *dl_rq);
 extern void init_freezer_rq(struct freezer_rq *fr);
+extern void init_heater_rq(struct heater_rq *hr);
 
 extern void cfs_bandwidth_usage_inc(void);
 extern void cfs_bandwidth_usage_dec(void);
