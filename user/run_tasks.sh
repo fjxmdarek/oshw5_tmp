@@ -12,14 +12,15 @@
 chrt --fifo -p 99 $$
 
 FILE=$1
+POLICY=${2:-7}   # default to SCHED_FIFO if not provided 
 if [[ -z "$FILE" ]]; then
-        echo "Usage: $0 <job file>"
+        echo "Usage: $0 <job file> [policy]"
         exit
 fi
 
 pids=""
 while read line; do
-        chrt --fifo 90 ./fibonacci $line &
+        chrt --fifo 90 ./fibonacci $line $POLICY &
         pids="$pids $!"
 done <<< $(cat $FILE)
 

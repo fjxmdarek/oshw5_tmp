@@ -14,21 +14,25 @@ unsigned long long fib(unsigned long long n)
 
 int main(int argc, char **argv)
 {
-	struct sched_param params = {0};
-	int ret;
-	unsigned long long n;
+    struct sched_param params = {0};
+    int ret;
+    unsigned long long n;
+    int policy = 7;                          // new
 
-	ret = sched_setscheduler(0, 7, &params);
-	if (ret) {
-		fprintf(stderr, "Freezer scheduling policy does not exist\n");
-		exit(1);
-	}
+    if (argc == 3)                           // new
+        policy = atoi(argv[2]);          // new
 
-	if (argc != 2) {
-		fprintf(stderr, "Usage: ./fibonacci [number]\n");
-		exit(1);
-	}
+    ret = sched_setscheduler(0, policy, &params);   // 7 → policy
+    if (ret) {
+        fprintf(stderr, "Freezer scheduling policy does not exist\n");
+        exit(1);
+    }
 
-	n = atoi(argv[1]);
-	return fib(n);
+    if (argc < 2) {                          // != 2 → < 2
+        fprintf(stderr, "Usage: ./fibonacci [number]\n");
+        exit(1);
+    }
+
+    n = atoi(argv[1]);
+    return fib(n);
 }

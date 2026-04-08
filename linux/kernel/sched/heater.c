@@ -48,15 +48,17 @@ static void enqueue_task_heater(struct rq *rq, struct task_struct *p, int flags)
 		/* local slot is free: place the task here */
 		list_add_tail(&he->run_list, &rq->hr.tasks);
 		rq->hr.nr_running++;
+		raw_spin_unlock(&global_rq_lock);
+		add_nr_running(rq, 1);
 	} else {
-		/* local is full: overflow to global queue (at tail) */
+		/* local is full: overflow to global queue (at tail);
+		 * do NOT call add_nr_running here — the task has no
+		 * owning CPU yet; the CPU that picks it will account for it
+		 */
 		list_add_tail(&he->run_list, &global_rq.tasks);
 		global_rq.nr_running++;
+		raw_spin_unlock(&global_rq_lock);
 	}
-
-	raw_spin_unlock(&global_rq_lock);
-
-	add_nr_running(rq, 1);
 }
 
 /*
@@ -74,18 +76,18 @@ static void dequeue_task_heater(struct rq *rq, struct task_struct *p, int flags)
 	if (!list_empty(&rq->hr.tasks) &&
 	    list_first_entry(&rq->hr.tasks,
 			     struct sched_heater_entity, run_list) == he) {
-		/* task is in the local queue */
+		/* task is in the local queue — this CPU owns its nr_running */
 		list_del_init(&he->run_list);
 		rq->hr.nr_running--;
+		raw_spin_unlock(&global_rq_lock);
+		sub_nr_running(rq, 1);
 	} else {
-		/* task is in the global queue */
+		/* task is in the global queue — no CPU has accounted for it */
 		list_del_init(&he->run_list);
 		global_rq.nr_running--;
+		raw_spin_unlock(&global_rq_lock);
+		/* do NOT call sub_nr_running — add_nr_running was never called */
 	}
-
-	raw_spin_unlock(&global_rq_lock);
-
-	sub_nr_running(rq, 1);
 }
 
 /*
@@ -116,6 +118,8 @@ static struct task_struct *pick_next_task_heater(struct rq *rq)
 		global_rq.nr_running--;
 		rq->hr.nr_running++;
 		raw_spin_unlock(&global_rq_lock);
+		/* task pulled from global: this CPU now owns its nr_running */
+		add_nr_running(rq, 1);
 		return container_of(he, struct task_struct, heater);
 	}
 
@@ -144,6 +148,9 @@ static void yield_task_heater(struct rq *rq)
 	global_rq.nr_running++;
 
 	raw_spin_unlock(&global_rq_lock);
+
+	/* releasing local ownership: task goes back to global (unaccounted) */
+	sub_nr_running(rq, 1);
 }
 
 /*
