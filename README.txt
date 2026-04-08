@@ -1,15 +1,17 @@
-This file should contain:
+Name(s) and UNI(s):
+- [Xianghao Zhang], [xz3475]
+- [Oliviero Nardin], [on2207]
+- [Jiaxing Lu], [jl7311]
 
--	Your name & UNI (or those of all group members for group assignments)
--	Homework assignment number
--	Description for each part
+Homework Assignment:
+- HW5: Freezer
 
-The description should indicate whether your solution for the part is working
-or not. You may also want to include anything else you would like to
-communicate to the grader, such as extra functionality you implemented or how
-you tried to fix your non-working code.
+Part 1: Measure scheduler performance with eBPF
+- on2207
+- Status: Working.
+- Implementation summary: TODO
 
-Part1 Runtime statistics:
+Runtime statistics:
 
 4 Core CPU:
 - taskset1 average completion time: 103.96 ms
@@ -18,3 +20,14 @@ Part1 Runtime statistics:
 1 Core CPU:
 - taskset1 average completion time: 37.7879 ms
 - taskset2 average completion time: 18.3333 ms
+
+Part 2: Freezer, unplugged
+- on2207
+- Status: Working.
+- Implementation summary: TODO
+
+
+Part 3: Turn on the Freezer
+- on2207
+- Status: Working.
+- Implementation summary: TODO
